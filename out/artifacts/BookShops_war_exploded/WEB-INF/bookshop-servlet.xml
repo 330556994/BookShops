@@ -1,0 +1,84 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--  关联 properties  文件 -->
+    <context:property-placeholder location="classpath:dbmysql.properties" />
+
+    <!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射-->
+    <mvc:annotation-driven/>
+
+    <!-- 启动包扫描功能，以便注册带有@Controller、@Service、@repository、@Component等注解的类成为spring的bean -->
+    <context:component-scan base-package="com.gt.bookshop"/>
+
+    <!-- 对模型视图名称的解析，在请求时模型视图名称添加前后缀 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--以下为配置 MyBatis -->
+    <!--  数据源 -->
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+          p:driverClassName="${driver}"
+          p:url="${url}"
+          p:username="${name}"
+          p:password="${password}"/>
+
+    <!--
+    class:  指定用来创建 sqlSession  的工厂
+    dataSource-ref:  使用的数据源
+    typeAliasesPackage:  自动扫描的实体类包
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+          p:dataSource-ref="dataSource"
+          p:mapperLocations="classpath:com/gt/bookshop/mapper/*.xml"
+          p:typeAliasesPackage="com.gt.bookshop.entity"/>
+
+
+    <!--
+    class :  指定自动扫描 xxxMapper.xml  映射文件的类
+    basePackage:  自动扫描的配置包
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"
+          p:basePackage="com.gt.bookshop.mapper"
+
+          p:sqlSessionFactoryBeanName="sqlSessionFactory"/>
+
+    <!--  事务管理 -->
+    <bean id="txManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+          p:dataSource-ref="dataSource"/>
+
+    <!--
+		default-servlet-handler 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler,
+		它会对进入 DispatcherServlet 的请求进行筛查, 如果发现是没有经过映射的请求, 就将该请求交由 WEB 应用服务器默认的
+		Servlet 处理. 如果不是静态资源的请求，才由 DispatcherServlet 继续处理
+
+		一般 WEB 应用服务器默认的 Servlet 的名称都是 default.
+		若所使用的 WEB 服务器的默认 Servlet 名称不是 default，则需要通过 default-servlet-name 属性显式指定
+
+	-->
+    <!--<mvc:default-servlet-handler/>-->
+
+    <!-- 配置使用 SimpleMappingExceptionResolver 来映射异常 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionAttribute" value="ex"></property>
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.ArrayIndexOutOfBoundsException">error</prop>
+            </props>
+        </property>
+    </bean>
+
+    <mvc:default-servlet-handler/>
+
+
+</beans>

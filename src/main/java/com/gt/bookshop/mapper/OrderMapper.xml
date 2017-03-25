@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace必须是接口的全类名  -->
+<mapper namespace="com.gt.bookshop.mapper.OrderMapper">
+	<insert id="add" parameterType="Order">
+		INSERT INTO tb_orders(OrderDate,UserId,TotalPrice,flag,personName,phone,address,sendCash,OrderRemark) VALUES(#{orderDate},#{userId},{totalPrice},#{flag},#{personName},#{phone},#{address},#{sendCash},#{orderRemark})
+	</insert>
+
+	<select id="getId" resultType="int">
+		SELECT seq_orders_id.currval FROM dual
+	</select>
+
+</mapper>

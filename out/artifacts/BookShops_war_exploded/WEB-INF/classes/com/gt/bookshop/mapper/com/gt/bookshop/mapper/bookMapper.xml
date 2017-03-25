@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace必须是接口的全类名  -->
+<mapper namespace="com.gt.bookshop.mapper.BookMapper">
+	<resultMap id="book" type="Book">
+		<id column="id" property="id"/>
+		<result property="title" column="title"/>
+		<result property="author" column="author"/>
+		<result property="ISBN" column="isbn"/>
+		<result property="publisherId" column="publisherId"/>
+		<result property="publishDate" column="publishDate"/>
+		<result property="marketPrice" column="marketPrice"/>
+		<result property="unitPrice" column="unitPrice"/>
+		<result property="contentDescription" column="contentDescirption"/>
+		<result property="TOC" column="toc"/>
+		<result property="categoryId" column="categoryId"/>
+		<result property="clicks" column="clicks"/>
+		<association property="category" column="categoryId" javaType="Category">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+		<association property="publisher" column="publisherId" javaType="Publisher">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+	</resultMap>
+	<select id="getRecordCount" resultType="int">
+		select count(*) from tb_books
+	</select>
+
+	<select id="getList" resultMap="book">
+		select * from tb_books inner join tb_categories ON tb_books.CategoryId=tb_categories.id inner join tb_publishers ON tb_books.publisherid=tb_publishers.id
+	</select>
+
+	<select id="getNewBooks" parameterType="int" resultType="Book">
+		SELECT id,title FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ID) RNO, ID,TITLE FROM tb_books order by publishdate desc)WHERE RNO &lt; #{top}
+	</select>
+
+	<select id="getHotBooks" parameterType="int" resultType="Book">
+		SELECT id,title FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ID) RNO, ID,TITLE FROM tb_books order by clicks desc)WHERE RNO &lt; #{top}
+	</select>
+
+	<select id="getHomeBooks" parameterType="int" resultType="Book">
+		SELECT id,title,isbn FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ID) RNO, ID,TITLE,ISBN FROM tb_books)WHERE RNO &lt; #{top}
+	</select>
+
+	<select id="getSingle" parameterType="int" resultMap="book">
+		select * from tb_books inner join tb_categories ON tb_books.CategoryId=tb_categories.id inner join tb_publishers ON tb_books.publisherid=tb_publishers.id  where tb_books.id = #{id}
+	</select>
+</mapper>
